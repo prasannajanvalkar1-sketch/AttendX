@@ -34,7 +34,7 @@ export function calculateCurrentAttendance(
 
     validDailyRecords.forEach((record) => {
       // New schema uses 'cancelled', old schema doesn't have it. Skip cancelled.
-      if (record.status !== 'cancelled') {
+      if ((record.status as string) !== 'cancelled') {
         conducted += 1;
         if (record.status === 'present') {
           attended += 1;

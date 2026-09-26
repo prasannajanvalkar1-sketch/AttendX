@@ -4,11 +4,11 @@ import type {
   OfficialSnapshot,
   AttendanceSnapshotSubject,
   DailyAttendanceRecord,
-  TimetableEntry,
   Holiday,
   Settings,
   Subject,
 } from '../types';
+import type { WeeklySchedule } from '../services/timetableService';
 import { useAuth } from '../contexts/AuthContext';
 import { profileService } from '../services/profileService';
 import { settingsService } from '../services/settingsService';
@@ -24,14 +24,14 @@ interface AttendanceContextType {
   snapshot: OfficialSnapshot | null;
   snapshotSubjects: AttendanceSnapshotSubject[];
   dailyRecords: DailyAttendanceRecord[];
-  timetable: TimetableEntry[];
+  timetable: WeeklySchedule | null;
   holidays: Holiday[];
   loading: boolean;
   
   updateSettings: (settings: Partial<Settings>) => Promise<void>;
   addDailyRecord: (record: Omit<DailyAttendanceRecord, 'id'>) => Promise<void>;
   deleteDailyRecord: (id: string) => Promise<void>;
-  updateTimetable: (timetable: TimetableEntry[]) => Promise<void>;
+  updateTimetable: (timetable: WeeklySchedule) => Promise<void>;
   addSubject: (subject: Omit<Subject, 'id'>) => Promise<Subject>;
   refreshData: () => Promise<void>;
 }
@@ -47,7 +47,7 @@ export function AttendanceProvider({ children }: { children: ReactNode }) {
   const [snapshot, setSnapshot] = useState<OfficialSnapshot | null>(null);
   const [snapshotSubjects, setSnapshotSubjects] = useState<AttendanceSnapshotSubject[]>([]);
   const [dailyRecords, setDailyRecords] = useState<DailyAttendanceRecord[]>([]);
-  const [timetable, setTimetable] = useState<TimetableEntry[]>([]);
+  const [timetable, setTimetable] = useState<WeeklySchedule | null>(null);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -127,10 +127,10 @@ export function AttendanceProvider({ children }: { children: ReactNode }) {
     setDailyRecords(dailyRecords.filter(r => r.id !== id));
   };
 
-  const updateTimetable = async (newTimetable: TimetableEntry[]) => {
+  const updateTimetable = async (newTimetable: WeeklySchedule) => {
     if (!user) return;
-    const saved = await timetableService.updateTimetable(newTimetable, user.id);
-    setTimetable(saved);
+    await timetableService.saveTimetable(user.id, newTimetable);
+    setTimetable(newTimetable);
   };
 
   const addSubject = async (subject: Omit<Subject, 'id'>) => {
