@@ -55,9 +55,6 @@ export default function Signup() {
       console.error("Supabase signup error:", error);
       setError(error.message);
       setLoading(false);
-    } else if (data.user && !data.session) {
-      setError("Please check your email for a confirmation link to complete your signup.");
-      setLoading(false);
     } else {
       navigate('/onboarding');
     }
